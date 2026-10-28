@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 > A modern, full-stack data analytics and intelligence dashboard engineered to ingest, clean, explore, and analyze consumer product reviews using natural language processing (NLP), time-series modeling, and relational data architecture.
-
+link to the model : https://review-radar-sepia.vercel.app/
 ---
 
 ## Table of Contents
