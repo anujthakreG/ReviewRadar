@@ -11,7 +11,8 @@ import {
   ImportSummary,
 } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const rawBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+export const API_BASE = rawBase.replace(/\/+$/, '');
 
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE}${endpoint}`;
@@ -120,6 +121,7 @@ export const api = {
     }),
 
   downloadSampleCsvUrl: () => `${API_BASE}/api/sample-data/download`,
+  getDocsUrl: () => `${API_BASE}/docs`,
 
   resetDatabase: () =>
     request<{ status: string; message: string }>('/api/database/reset', {

@@ -109,7 +109,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           <div className="p-4 bg-slate-900/60 rounded-xl border border-slate-800">
             <span className="text-[11px] text-slate-400 block mb-1">Interactive API Docs</span>
             <a
-              href="http://localhost:8000/docs"
+              href={api.getDocsUrl()}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5"

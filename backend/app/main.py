@@ -19,7 +19,11 @@ from app.api.routes import (
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Create tables automatically on startup
-    Base.metadata.create_all(bind=engine)
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        import logging
+        logging.getLogger("uvicorn").warning(f"Database table initialization warning: {e}")
     yield
 
 
@@ -34,10 +38,12 @@ app = FastAPI(
 
 # CORS Middleware
 origins = settings.CORS_ORIGINS if isinstance(settings.CORS_ORIGINS, list) else ["*"]
+allow_all = "*" in origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
+    allow_origins=["*"] if allow_all else origins,
+    allow_origin_regex=None if allow_all else r"https://.*\.vercel\.app",
+    allow_credentials=not allow_all,
     allow_methods=["*"],
     allow_headers=["*"],
 )

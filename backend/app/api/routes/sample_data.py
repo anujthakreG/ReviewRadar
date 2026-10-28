@@ -9,20 +9,35 @@ from app.schemas.upload import ImportSummary
 
 router = APIRouter(tags=["Sample Data & Database Management"])
 
-SAMPLE_CSV_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "data", "sample_reviews.csv")
-)
+
+def get_sample_csv_path() -> str:
+    """Finds sample_reviews.csv across various local, root, and container execution paths."""
+    candidates = [
+        # Relative to backend/app/api/routes/
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "sample_reviews.csv")),
+        # Relative to project root
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "data", "sample_reviews.csv")),
+        # Current working directory / data
+        os.path.abspath(os.path.join(os.getcwd(), "data", "sample_reviews.csv")),
+        # Current working directory / backend / data
+        os.path.abspath(os.path.join(os.getcwd(), "backend", "data", "sample_reviews.csv")),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return candidates[0]
 
 
 @router.post("/sample-data/load", response_model=ImportSummary, summary="Load synthetic sample dataset")
 def load_sample_dataset(db: Session = DbSession):
-    if not os.path.exists(SAMPLE_CSV_PATH):
+    csv_path = get_sample_csv_path()
+    if not os.path.exists(csv_path):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Sample CSV file not found at {SAMPLE_CSV_PATH}",
+            detail=f"Sample CSV file not found at any inspected paths.",
         )
 
-    with open(SAMPLE_CSV_PATH, "rb") as f:
+    with open(csv_path, "rb") as f:
         contents = f.read()
 
     import_service = ImportService(db)
@@ -37,13 +52,14 @@ def load_sample_dataset(db: Session = DbSession):
 
 @router.get("/sample-data/download", summary="Download sample review CSV template")
 def download_sample_csv():
-    if not os.path.exists(SAMPLE_CSV_PATH):
+    csv_path = get_sample_csv_path()
+    if not os.path.exists(csv_path):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Sample reviews CSV is not available on disk.",
         )
 
-    with open(SAMPLE_CSV_PATH, "r", encoding="utf-8") as f:
+    with open(csv_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     return Response(
